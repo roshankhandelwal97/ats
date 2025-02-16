@@ -1,0 +1,20 @@
+# Virtual Environment
+venv/
+env/
+
+# Python files
+*.py[cod]
+__pycache__/
+
+# SQLite database
+db.sqlite3
+
+# Django project files (adjust if necessary)
+# (Uncomment the following line if you choose to ignore migrations)
+# */migrations/
+
+# Ignore the jd_files folder in the backend directory
+backend/jd_files/
+
+# Environment variables file
+.env
