@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import path, include
-
+#Author Tanmay
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/user/', include('user.urls')),            # Registration, login, profile
