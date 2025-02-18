@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework import status, parsers, permissions
 
 from .utils.openai_client import generate_embedding, extract_structured_data
-from .utils.pinecone_client import upsert_embedding
+from .utils.pinecone_client import upsert_embedding, get_All_VectorId
 # If you need to parse PDF/DOCX, import from your file_parser
 from .utils.file_parser import parse_file  # hypothetical PDF/DOCX parser
 
@@ -56,6 +56,14 @@ class ResumeEmbeddingView(APIView):
         finally:
             if tmp_file_path and os.path.exists(tmp_file_path):
                 os.remove(tmp_file_path)
+
+    #Function added by Tanmay to fetch the ids of vector embedding stored in pinecone
+    def get(self, request):
+        try:
+            embedding_ids = get_All_VectorId()
+            return Response({"embedding_ids": embedding_ids}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class JDEmbeddingView(APIView):
     """

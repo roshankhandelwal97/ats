@@ -38,3 +38,22 @@ def upsert_embedding(doc_id, embedding, metadata=None):
     index = pc.Index(INDEX_NAME)
     vector = {"id": str(doc_id), "values": embedding, "metadata": metadata or {}}
     index.upsert([vector])
+
+
+#New Function added by Tanmay to get all the stored id's in pinecone
+def get_All_VectorId():
+
+    # Initialize Pinecone
+    #Pinecone.init(api_key=PINECONE_API_KEY, environment=PINECONE_ENV)
+
+    # Select the Pinecone index where embeddings are stored
+    index = pc.Index(INDEX_NAME)
+    print("Index "+str(index))
+
+    # Fetch all vector IDs (metadata-only query)
+    vector_ids = list(index.list())  # This retrieves all stored IDs
+
+    # Print the vector IDs
+    print("Stored Embedding IDs:", vector_ids)
+
+    return vector_ids
