@@ -14,7 +14,7 @@ from .serializers import JobSerializer
 
 from embedding.utils.file_parser import parse_file
 from embedding.utils.openai_client import generate_embedding, extract_structured_data
-from embedding.utils.pinecone_client import upsert_embedding
+from embedding.utils.pinecone_client import upsert_embedding_jd
 
 
 class JobCreateView(generics.CreateAPIView):
@@ -57,7 +57,7 @@ class JobCreateView(generics.CreateAPIView):
 
             # 4. Upsert embedding
             doc_id = f"job-{job_id}-jd"
-            upsert_embedding(doc_id, embedding, metadata={"type": "jd", "job_id": job_id})
+            upsert_embedding_jd(doc_id, embedding, metadata={"type": "jd", "job_id": job_id})
 
             # 5. Extract structured JSON
             structured_json = extract_structured_data(raw_text, role="jd")

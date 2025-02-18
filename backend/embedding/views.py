@@ -1,17 +1,17 @@
 import os
 import tempfile
+import uuid
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, parsers, permissions
 
 from .utils.openai_client import generate_embedding, extract_structured_data
-from .utils.pinecone_client import upsert_embedding, get_All_VectorId
-# If you need to parse PDF/DOCX, import from your file_parser
 from .utils.file_parser import parse_file  # hypothetical PDF/DOCX parser
+from .utils.pinecone_client import create_index_resume, upsert_embedding_resume, upsert_embedding_jd, get_All_VectorId
 
 class ResumeEmbeddingView(APIView):
-    """
+    """    
     Endpoint to:
     1. Parse the uploaded resume file.
     2. Generate embeddings (store in Pinecone).
@@ -40,8 +40,13 @@ class ResumeEmbeddingView(APIView):
             embedding = generate_embedding(raw_text)
             
             # Suppose we store the embedding in Pinecone with doc_id = userID-resumeID, etc.
-            doc_id = f"resume-{request.user.id}"
-            upsert_embedding(doc_id, embedding, metadata={"role": "resume", "user_id": request.user.id})
+            #doc_id = f"resume-{request.user.id}"
+
+            #Changed the logic to create unique doc id everytime
+            
+            print("User ID"+str(request.user.id))
+            doc_id = f"resume-{request.user.id}-{str(uuid.uuid4())[:8]}"
+            upsert_embedding_resume(doc_id, embedding, metadata={"role": "resume", "user_id": request.user.id})
 
             # 3. Extract structured JSON
             structured_output = extract_structured_data(raw_text, role="resume")
@@ -87,8 +92,9 @@ class JDEmbeddingView(APIView):
             raw_text = parse_file(tmp_file_path)
 
             embedding = generate_embedding(raw_text)
-            doc_id = f"jd-{request.user.id}"
-            upsert_embedding(doc_id, embedding, metadata={"role": "jd", "user_id": request.user.id})
+            #doc_id = f"jd-{request.user.id}"
+            doc_id = f"jd-{request.user.id}-{str(uuid.uuid4())[:8]}"
+            upsert_embedding_jd(doc_id, embedding, metadata={"role": "jd", "user_id": request.user.id})
 
             structured_output = extract_structured_data(raw_text, role="jd")
 
@@ -102,3 +108,22 @@ class JDEmbeddingView(APIView):
         finally:
             if tmp_file_path and os.path.exists(tmp_file_path):
                 os.remove(tmp_file_path)
+
+
+class CreateIndexView(APIView):
+    """
+    API Endpoint to create a new Pinecone index.
+    """
+    #permission_classes = [permissions.IsAdminUser]  # Restrict to admin users
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        index_name = request.data.get("index_name")
+        # dimensions = request.data.get("dimensions", 1536)  # Default to OpenAI's dimension
+        # metric = request.data.get("metric", "cosine")  # Default metric
+
+        if not index_name:
+            return Response({"error": "Index name is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        result = create_index_resume(index_name)
+        return Response(result, status=status.HTTP_201_CREATED)
