@@ -37,8 +37,9 @@ class ResumeUploadView(APIView):
             embedding = generate_embedding(raw_text)
 
             # 4. Upsert embedding to vector DB (e.g., Pinecone)
+            user = request.user
             doc_id = f"candidate-{request.user.id}-resume"
-            upsert_embedding_resume(doc_id, embedding, metadata={"type": "resume", "candidate_id": request.user.id})
+            upsert_embedding_resume(user,doc_id, embedding, metadata={"type": "resume", "candidate_id": request.user.id})
 
             # 5. Extract structured JSON from OpenAI (resume fields)
             structured_json = extract_structured_data(raw_text, role="resume")

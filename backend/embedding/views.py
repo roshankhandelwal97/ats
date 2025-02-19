@@ -43,10 +43,10 @@ class ResumeEmbeddingView(APIView):
             #doc_id = f"resume-{request.user.id}"
 
             #Changed the logic to create unique doc id everytime
-            
+            user = request.user
             print("User ID"+str(request.user.id))
             doc_id = f"resume-{request.user.id}-{str(uuid.uuid4())[:8]}"
-            upsert_embedding_resume(doc_id, embedding, metadata={"role": "resume", "user_id": request.user.id})
+            upsert_embedding_resume(user,doc_id, embedding, metadata={"role": "resume", "user_id": request.user.id})
 
             # 3. Extract structured JSON
             structured_output = extract_structured_data(raw_text, role="resume")

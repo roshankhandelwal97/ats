@@ -1,5 +1,6 @@
 import os
 from pinecone import Pinecone, ServerlessSpec
+from user.models import ResumeEmbedding, JobEmbedding
 
 # Load the Pinecone API key from environment variables
 PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
@@ -42,7 +43,8 @@ def create_index(dimensions):
 #     vector = {"id": str(doc_id), "values": embedding, "metadata": metadata or {}}
 #     index.upsert([vector])
 
-def upsert_embedding_resume(doc_id, embedding, metadata=None):
+
+def upsert_embedding_resume(user,doc_id, embedding, metadata=None):
     """
     Upsert a vector embedding into the Pinecone index.
     - doc_id: A unique identifier for the document.
@@ -53,6 +55,9 @@ def upsert_embedding_resume(doc_id, embedding, metadata=None):
     index = pc.Index(INDEX_NAME_RESUME)
     vector = {"id": str(doc_id), "values": embedding, "metadata": metadata or {}}
     index.upsert([vector])
+
+    # Store resume ID in the database
+    ResumeEmbedding.objects.create(user=user, resume_id=doc_id)
 
 def upsert_embedding_jd(doc_id, embedding, metadata=None):
     """
